@@ -1,436 +1,175 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 
-const cartasDisponibles = [
-  { nombre: "Melanie", imagen: process.env.PUBLIC_URL + "/imagene/carta/melanie.png", rareza: "Común" },
-  { nombre: "Joker", imagen: process.env.PUBLIC_URL + "/imagene/carta/joker.png", rareza: "Mítica" },
-  { nombre: "Rika", imagen: process.env.PUBLIC_URL + "/imagene/carta/rika.png", rareza: "Rara" },
-  { nombre: "Luck", imagen: process.env.PUBLIC_URL + "/imagene/carta/luck.png", rareza: "Legendaria" },
-  { nombre: "Scar", imagen: process.env.PUBLIC_URL + "/imagene/carta/scar.png", rareza: "Poco Común" },
-  { nombre: "Metis", imagen: process.env.PUBLIC_URL + "/imagene/carta/metis.png", rareza: "Mítica" },
+// Datos ejemplo de cartas
+const cartasData = [
+  { id: 1, nombre: "Melanie", rareza: "comun", imagen: "/imagene/carta/melanie.png" },
+  { id: 2, nombre: "Scar", rareza: "poco-comun", imagen: "/imagene/carta/scar.png" },
+  { id: 3, nombre: "Rika", rareza: "rara", imagen: "/imagene/carta/pika.png" },
+  { id: 4, nombre: "Metis", rareza: "mitica", imagen: "/imagene/carta/metis.png" },
+  { id: 5, nombre: "Joker", rareza: "mitica", imagen: "/imagene/carta/joker.png" },
+  { id: 6, nombre: "Luck", rareza: "legendaria", imagen: "/imagene/carta/luck.png" },
 ];
 
-const jugadores = [
-  { id: "Luck", nombre: "Luck" },
-  { id: "Metis", nombre: "Metis" },
-];
-
-// Probabilidades normalizadas según tus porcentajes
-const probabilidades = [
-  { rareza: "Legendaria", porcentaje: 0.59 },
-  { rareza: "Mítica", porcentaje: 1.78 },
-  { rareza: "Rara", porcentaje: 8.88 },
-  { rareza: "Poco Común", porcentaje: 29.59 },
-  { rareza: "Común", porcentaje: 59.17 },
-];
-
-// Helper para elegir rareza según probabilidad
-function elegirRareza() {
-  const rand = Math.random() * 100;
-  let acumulado = 0;
-  for (const prob of probabilidades) {
-    acumulado += prob.porcentaje;
-    if (rand <= acumulado) return prob.rareza;
-  }
-  return "Común"; // fallback
-}
-
-// Elegir una carta aleatoria dado rareza
-function cartaAleatoriaPorRareza(rareza) {
-  const filtradas = cartasDisponibles.filter((c) => c.rareza === rareza);
-  if (filtradas.length === 0) return null;
-  return filtradas[Math.floor(Math.random() * filtradas.length)];
-}
+// Usuario simulado con foto y datos
+const usuario = {
+  nombre: "Luck",
+  fotoPerfil: "/imagenes/perfil/luck.png",
+  amigos: 12,
+  logros: 5,
+};
 
 function App() {
-  const [usuarioActual, setUsuarioActual] = useState("Luck");
-  const [coleccion, setColeccion] = useState([]);
-  const [propuestas, setPropuestas] = useState([]);
-  const [jugadorDestino, setJugadorDestino] = useState(jugadores.find((j) => j.id !== usuarioActual).id);
-  const [cartaOfrecida, setCartaOfrecida] = useState(null);
-  const [cartaDeseada, setCartaDeseada] = useState(null);
+  const [coleccion, setColeccion] = useState([
+    { cartaId: 1, cantidad: 2 },
+    { cartaId: 3, cantidad: 1 },
+    { cartaId: 5, cantidad: 1 },
+  ]);
 
-  // Para abrir sobres
-  const [cartasAbrir, setCartasAbrir] = useState([]);
-  const [abriendoSobre, setAbriendoSobre] = useState(false);
+  const [mostrarIntercambio, setMostrarIntercambio] = useState(false);
 
-  // Modal perfil abierto o no
-  const [perfilAbierto, setPerfilAbierto] = useState(false);
+  const [cartaDoy, setCartaDoy] = useState(null);
+  const [cartaQuiero, setCartaQuiero] = useState(null);
 
-  // Pantalla actual: "principal" o "intercambio"
-  const [pantalla, setPantalla] = useState("principal");
+  const getCartaById = (id) => cartasData.find((carta) => carta.id === id);
 
-  useEffect(() => {
-    const guardadoColeccion = localStorage.getItem(`coleccion_${usuarioActual}`);
-    if (guardadoColeccion) setColeccion(JSON.parse(guardadoColeccion));
-    else setColeccion([]);
-
-    const guardadoPropuestas = localStorage.getItem("propuestas");
-    if (guardadoPropuestas) setPropuestas(JSON.parse(guardadoPropuestas));
-    else setPropuestas([]);
-
-    setJugadorDestino(jugadores.find((j) => j.id !== usuarioActual).id);
-    setCartaOfrecida(null);
-    setCartaDeseada(null);
-    setCartasAbrir([]);
-    setAbriendoSobre(false);
-    setPerfilAbierto(false);
-    setPantalla("principal");
-  }, [usuarioActual]);
-
-  useEffect(() => {
-    localStorage.setItem(`coleccion_${usuarioActual}`, JSON.stringify(coleccion));
-  }, [coleccion, usuarioActual]);
-
-  useEffect(() => {
-    localStorage.setItem("propuestas", JSON.stringify(propuestas));
-  }, [propuestas]);
-
-  const abrirSobre = () => {
-    setAbriendoSobre(true);
-    const nuevasCartas = [];
-    // Abre 5 cartas con rarezas según probabilidad
-    for (let i = 0; i < 5; i++) {
-      const rareza = elegirRareza();
-      const carta = cartaAleatoriaPorRareza(rareza);
-      if (carta) nuevasCartas.push(carta);
-      else {
-        // fallback: carta común random
-        nuevasCartas.push(
-          cartasDisponibles.find((c) => c.rareza === "Común") || cartasDisponibles[0]
-        );
-      }
-    }
-    setCartasAbrir(nuevasCartas);
-
-    setTimeout(() => {
-      setColeccion((prev) => [...prev, ...nuevasCartas]);
-      setAbriendoSobre(false);
-      alert("¡Abriste un sobre y obtuviste 5 cartas!");
-    }, 2000);
+  const getCantidadCarta = (id) => {
+    const c = coleccion.find((c) => c.cartaId === id);
+    return c ? c.cantidad : 0;
   };
 
-  const contarCopias = () => {
-    const conteo = {};
-    coleccion.forEach((carta) => {
-      conteo[carta.nombre] = (conteo[carta.nombre] || 0) + 1;
-    });
-    return conteo;
-  };
-  const conteo = contarCopias();
+  const tieneCarta = (id) => getCantidadCarta(id) > 0;
 
-  const propuestasRecibidas = propuestas.filter((p) => p.destino === usuarioActual);
-  const propuestasEnviadas = propuestas.filter((p) => p.origen === usuarioActual);
+  const toggleIntercambio = () => setMostrarIntercambio(!mostrarIntercambio);
 
-  // Intercambio funciones...
-
+  // Propuesta simple - por ahora solo alerta
   const enviarPropuesta = () => {
-    if (!cartaOfrecida || !cartaDeseada) {
-      alert("Seleccioná la carta que ofrecés y la que querés");
+    if (!cartaDoy || !cartaQuiero) {
+      alert("Selecciona cartas para intercambiar.");
       return;
     }
-    if (!coleccion.find((c) => c.nombre === cartaOfrecida)) {
-      alert("No tenés esa carta para ofrecer");
+    if (cartaDoy === cartaQuiero) {
+      alert("No puedes intercambiar la misma carta.");
       return;
     }
-    setPropuestas([
-      ...propuestas,
-      {
-        id: Date.now(),
-        origen: usuarioActual,
-        destino: jugadorDestino,
-        cartaOfrecida,
-        cartaDeseada,
-        estado: "pendiente",
-      },
-    ]);
-    alert("¡Propuesta enviada con éxito!");
-    setCartaOfrecida(null);
-    setCartaDeseada(null);
-  };
-
-  const aceptarPropuesta = (id) => {
-    const propuesta = propuestas.find((p) => p.id === id);
-    if (!propuesta) return;
-
-    if (!coleccion.find((c) => c.nombre === propuesta.cartaDeseada)) {
-      alert("No tenés la carta requerida para hacer el intercambio.");
+    if (getCantidadCarta(cartaDoy) === 0) {
+      alert("No tienes la carta para dar.");
       return;
     }
-
-    const nuevaColeccionActual = coleccion
-      .filter((c) => c.nombre !== propuesta.cartaDeseada)
-      .concat(cartasDisponibles.find((c) => c.nombre === propuesta.cartaOfrecida));
-    setColeccion(nuevaColeccionActual);
-
-    const coleccionOrigenStr = localStorage.getItem(`coleccion_${propuesta.origen}`);
-    let coleccionOrigen = coleccionOrigenStr ? JSON.parse(coleccionOrigenStr) : [];
-
-    coleccionOrigen = coleccionOrigen
-      .filter((c) => c.nombre !== propuesta.cartaOfrecida)
-      .concat(cartasDisponibles.find((c) => c.nombre === propuesta.cartaDeseada));
-
-    localStorage.setItem(`coleccion_${propuesta.origen}`, JSON.stringify(coleccionOrigen));
-
-    setPropuestas((prevPropuestas) =>
-      prevPropuestas.map((p) =>
-        p.id === id ? { ...p, estado: "aceptada" } : p
-      )
+    alert(
+      `Propuesta enviada: das "${getCartaById(cartaDoy).nombre}" y quieres "${getCartaById(
+        cartaQuiero
+      ).nombre}".`
     );
-
-    alert("✅ Intercambio realizado con éxito");
+    setCartaDoy(null);
+    setCartaQuiero(null);
+    setMostrarIntercambio(false);
   };
 
-  const rechazarPropuesta = (id) => {
-    setPropuestas((prevPropuestas) =>
-      prevPropuestas.map((p) => (p.id === id ? { ...p, estado: "rechazada" } : p))
-    );
-    alert("❌ Propuesta rechazada");
-  };
-
-  // Datos para perfil
-  const numCartas = coleccion.length;
-  const numAmigos = jugadores.length - 1;
-  const logros = []; // Podés agregar logros reales si querés
-
-  // Render perfil modal
-  const PerfilModal = () => (
-    <div
-      style={{
-        position: "fixed",
-        top: 0, left: 0, right: 0, bottom: 0,
-        backgroundColor: "rgba(0,0,0,0.7)",
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        zIndex: 1000,
-      }}
-      onClick={() => setPerfilAbierto(false)}
-    >
-      <div
-        style={{
-          backgroundColor: "white",
-          padding: 20,
-          borderRadius: 10,
-          width: 300,
-          position: "relative",
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h2>Perfil: {usuarioActual}</h2>
-        <p><b>Logros:</b></p>
-        {logros.length === 0 ? (
-          <p>No tenés insignias aún.</p>
-        ) : (
-          <ul>{logros.map((l, i) => <li key={i}>{l}</li>)}</ul>
-        )}
-        <p><b>Amigos:</b> {numAmigos}</p>
-        <p><b>Número de cartas:</b> {numCartas}</p>
-        <button onClick={() => setPerfilAbierto(false)}>Cerrar</button>
-      </div>
-    </div>
-  );
-
-  if (pantalla === "intercambio") {
-    // Render interfaz de intercambio (puedes adaptar la que ya tienes)
-    return (
-      <div style={{ padding: "1rem" }}>
-        <button onClick={() => setPantalla("principal")} style={{ marginBottom: 16 }}>
-          ← Volver a sobres
-        </button>
-
-        <h2>Intercambio de cartas</h2>
-
-        {/* Aquí tu código de intercambio: selección, propuestas, aceptar, rechazar */}
-        {/* Reutilizo parte del código intercambio abajo */}
-
-        <label>
-          A jugador:
-          <select
-            value={jugadorDestino}
-            onChange={(e) => setJugadorDestino(e.target.value)}
-          >
-            {jugadores
-              .filter((j) => j.id !== usuarioActual)
-              .map((j) => (
-                <option key={j.id} value={j.id}>
-                  {j.nombre}
-                </option>
-              ))}
-          </select>
-        </label>
-        <br />
-        <label>
-          Carta que ofrecés:
-          <select
-            value={cartaOfrecida || ""}
-            onChange={(e) => setCartaOfrecida(e.target.value)}
-          >
-            <option value="">--Elegí--</option>
-            {Object.entries(conteo).map(([nombre, cantidad]) => (
-              <option key={nombre} value={nombre}>
-                {nombre} (x{cantidad})
-              </option>
-            ))}
-          </select>
-        </label>
-        <br />
-        <label>
-          Carta que querés:
-          <select
-            value={cartaDeseada || ""}
-            onChange={(e) => setCartaDeseada(e.target.value)}
-          >
-            <option value="">--Elegí--</option>
-            {cartasDisponibles.map((c) => (
-              <option key={c.nombre} value={c.nombre}>
-                {c.nombre}
-              </option>
-            ))}
-          </select>
-        </label>
-        <br />
-        <button onClick={enviarPropuesta}>Enviar propuesta</button>
-
-        <div style={{ marginTop: 16 }}>
-          <h3>Propuestas recibidas</h3>
-          {propuestasRecibidas.length === 0 && <p>No hay propuestas recibidas.</p>}
-          {propuestasRecibidas.map((p) => {
-            const cartaOfrecidaObj = cartasDisponibles.find((c) => c.nombre === p.cartaOfrecida);
-            const cartaDeseadaObj = cartasDisponibles.find((c) => c.nombre === p.cartaDeseada);
-            return (
-              <div key={p.id} style={{ marginBottom: "0.5rem", borderBottom: "1px solid #ddd", paddingBottom: "0.5rem" }}>
-                <b>{p.origen}</b> te propone:
-                <br />
-                <img
-                  src={cartaOfrecidaObj.imagen}
-                  alt={p.cartaOfrecida}
-                  width={40}
-                  className={
-                    cartaOfrecidaObj.rareza === "Legendaria" || cartaOfrecidaObj.rareza === "Mítica"
-                      ? "brillo"
-                      : ""
-                  }
-                  style={{ verticalAlign: "middle", marginRight: "0.5rem" }}
-                />
-                Te da <b>{p.cartaOfrecida}</b> por
-                <img
-                  src={cartaDeseadaObj.imagen}
-                  alt={p.cartaDeseada}
-                  width={40}
-                  className={
-                    cartaDeseadaObj.rareza === "Legendaria" || cartaDeseadaObj.rareza === "Mítica"
-                      ? "brillo"
-                      : ""
-                  }
-                  style={{ verticalAlign: "middle", marginLeft: "0.5rem", marginRight: "0.5rem" }}
-                />
-                <b>{p.cartaDeseada}</b>.
-                <br />
-                Estado: {p.estado}
-                {p.estado === "pendiente" && (
-                  <>
-                    <button onClick={() => aceptarPropuesta(p.id)} style={{ marginRight: "0.5rem" }}>
-                      Aceptar
-                    </button>
-                    <button onClick={() => rechazarPropuesta(p.id)}>Rechazar</button>
-                  </>
-                )}
-              </div>
-            );
-          })}
-        </div>
-
-        <div style={{ marginTop: 16 }}>
-          <h3>Propuestas enviadas</h3>
-          {propuestasEnviadas.length === 0 && <p>No hay propuestas enviadas.</p>}
-          {propuestasEnviadas.map((p) => {
-            const cartaOfrecidaObj = cartasDisponibles.find((c) => c.nombre === p.cartaOfrecida);
-            const cartaDeseadaObj = cartasDisponibles.find((c) => c.nombre === p.cartaDeseada);
-            return (
-              <div key={p.id} style={{ marginBottom: "0.5rem", borderBottom: "1px solid #ddd", paddingBottom: "0.5rem" }}>
-                Propuesta a <b>{p.destino}</b>:
-                <br />
-                <img
-                  src={cartaOfrecidaObj.imagen}
-                  alt={p.cartaOfrecida}
-                  width={40}
-                  className={
-                    cartaOfrecidaObj.rareza === "Legendaria" || cartaOfrecidaObj.rareza === "Mítica"
-                      ? "brillo"
-                      : ""
-                  }
-                  style={{ verticalAlign: "middle", marginRight: "0.5rem" }}
-                />
-                Ofrecés <b>{p.cartaOfrecida}</b> por
-                <img
-                  src={cartaDeseadaObj.imagen}
-                  alt={p.cartaDeseada}
-                  width={40}
-                  className={
-                    cartaDeseadaObj.rareza === "Legendaria" || cartaDeseadaObj.rareza === "Mítica"
-                      ? "brillo"
-                      : ""
-                  }
-                  style={{ verticalAlign: "middle", marginLeft: "0.5rem", marginRight: "0.5rem" }}
-                />
-                <b>{p.cartaDeseada}</b>.
-                <br />
-                Estado: {p.estado}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  }
-
-  // Pantalla principal (sobres + botones)
   return (
-    <div style={{ padding: "1rem", position: "relative" }}>
-      {/* Botón perfil arriba a la derecha */}
-      <button
-        onClick={() => setPerfilAbierto(true)}
+    <div className="contenedor-principal" style={{ position: "relative", minHeight: "100vh" }}>
+      {/* PERFIL EN ESQUINA */}
+      <div
         style={{
           position: "fixed",
           top: 10,
           right: 10,
-          borderRadius: "50%",
-          width: 50,
-          height: 50,
-          backgroundImage: `url(${process.env.PUBLIC_URL + "/imagene/carta/" + usuarioActual.toLowerCase()}.png)`,
-          backgroundSize: "cover",
-          border: "2px solid #333",
-          cursor: "pointer",
+          backgroundColor: "white",
+          padding: "1rem",
+          borderRadius: "10px",
+          boxShadow: "0 0 10px rgba(0,0,0,0.15)",
+          width: "220px",
+          textAlign: "center",
+          zIndex: 1000,
         }}
-        title="Ver perfil"
-      />
-
-      <h2>Bienvenido, {usuarioActual}!</h2>
-
-      <div style={{ border: "1px solid #ccc", padding: "1rem", marginBottom: "1rem" }}>
-        <h3>Elegí un sobre para abrir</h3>
-        <button onClick={abrirSobre} disabled={abriendoSobre}>
-          {abriendoSobre ? "Abriendo..." : "Abrir sobre (5 cartas)"}
+      >
+        <img
+          src={usuario.fotoPerfil}
+          alt="Perfil"
+          style={{ width: "80px", height: "80px", borderRadius: "50%", marginBottom: "0.5rem" }}
+        />
+        <h3>{usuario.nombre}</h3>
+        <p>Amigos: {usuario.amigos}</p>
+        <p>Cartas: {coleccion.reduce((acc, c) => acc + c.cantidad, 0)}</p>
+        <p>Logros: {usuario.logros}</p>
+        <button
+          onClick={() => alert("Sesión cerrada")}
+          style={{
+            marginTop: "0.5rem",
+            backgroundColor: "#ff4d4d",
+            border: "none",
+            color: "white",
+            padding: "6px 12px",
+            borderRadius: "6px",
+            cursor: "pointer",
+          }}
+        >
+          Salir
         </button>
-
-        {cartasAbrir.length > 0 && (
-          <div style={{ marginTop: "1rem", display: "flex", gap: "1rem", justifyContent: "center" }}>
-            {cartasAbrir.map((carta, i) => (
-              <div key={i} className={`card ${["Legendaria", "Mítica"].includes(carta.rareza) ? "brillo" : ""}`} style={{ width: 100 }}>
-                <img src={carta.imagen} alt={carta.nombre} style={{ width: "100%", borderRadius: 8 }} />
-                <div><b>{carta.nombre}</b></div>
-                <div style={{ fontSize: "0.8em", color: "#666" }}>{carta.rareza}</div>
-              </div>
-            ))}
-          </div>
-        )}
       </div>
 
-      <button onClick={() => setPantalla("intercambio")} style={{ display: "block", margin: "0 auto", padding: "0.5rem 1rem" }}>
-        Ir a intercambio
-      </button>
+      <h1>Catálogo de Cartas</h1>
 
-      {perfilAbierto && <PerfilModal />}
+      <div className="catalogo-container" style={{ marginTop: "2rem" }}>
+        {cartasData.map((carta) => {
+          const clasesCarta = `card ${carta.rareza} ${!tieneCarta(carta.id) ? "no-obtenida" : ""}`;
+          return (
+            <div key={carta.id} className={clasesCarta}>
+              <img src={carta.imagen} alt={carta.nombre} />
+              <div>{carta.nombre}</div>
+              {!tieneCarta(carta.id) && <div className="faltante">¡Te falta!</div>}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* BOTÓN OPCIONAL DE INTERCAMBIO */}
+      <div style={{ marginTop: "1rem", textAlign: "center" }}>
+        <button onClick={toggleIntercambio}>
+          {mostrarIntercambio ? "Cancelar intercambio" : "Intercambiar (opcional)"}
+        </button>
+      </div>
+
+      {/* SECCIÓN INTERCAMBIO OPCIONAL */}
+      {mostrarIntercambio && (
+        <section style={{ marginTop: "2rem", maxWidth: "400px", marginLeft: "auto", marginRight: "auto" }}>
+          <h3>Proponer Intercambio</h3>
+          <div style={{ display: "flex", justifyContent: "center", gap: "1rem", flexWrap: "wrap" }}>
+            <div>
+              <label>Te doy:</label>
+              <br />
+              <select value={cartaDoy || ""} onChange={(e) => setCartaDoy(Number(e.target.value))}>
+                <option value="">Selecciona una carta</option>
+                {coleccion
+                  .filter(({ cantidad }) => cantidad > 0)
+                  .map(({ cartaId, cantidad }) => {
+                    const carta = getCartaById(cartaId);
+                    return (
+                      <option key={cartaId} value={cartaId}>
+                        {carta.nombre} (x{cantidad})
+                      </option>
+                    );
+                  })}
+              </select>
+            </div>
+
+            <div>
+              <label>Quiero:</label>
+              <br />
+              <select value={cartaQuiero || ""} onChange={(e) => setCartaQuiero(Number(e.target.value))}>
+                <option value="">Selecciona una carta</option>
+                {cartasData.map((carta) => (
+                  <option key={carta.id} value={carta.id}>
+                    {carta.nombre}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <button onClick={enviarPropuesta} style={{ marginTop: "1rem" }}>
+            Enviar Propuesta
+          </button>
+        </section>
+      )}
     </div>
   );
 }
