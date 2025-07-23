@@ -1,0 +1,31 @@
+.catalogo-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 20px;
+  padding: 20px;
+}
+
+.card {
+  background: white;
+  border-radius: 10px;
+  padding: 10px;
+  transition: 0.3s;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.2);
+  text-align: center;
+}
+
+.card img {
+  width: 100%;
+  border-radius: 8px;
+}
+
+.card.no-obtenida {
+  filter: grayscale(100%) opacity(0.5);
+}
+
+.faltante {
+  color: red;
+  font-weight: bold;
+  font-size: 0.9em;
+  margin-top: 5px;
+}

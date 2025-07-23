@@ -1,8 +1,8 @@
 {
-  "name": "mi-app-cartas",
+  "name": "Mi-app-cartas",
   "version": "0.1.0",
   "private": true,
-"homepage": "https://Luck201094.github.io/mi-app-cartas",
+ "homepage": "https://Luck201094.github.io/cartas-app",
   "dependencies": {
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
@@ -38,6 +38,6 @@
     ]
   },
   "devDependencies": {
-    "gh-pages": "^6.1.1"
+    "gh-pages": "^6.3.0"
   }
 }

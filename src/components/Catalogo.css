@@ -1,0 +1,45 @@
+.catalogo-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.card {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 0.5rem;
+  width: 150px;
+  text-align: center;
+}
+
+.card img {
+  width: 100%;
+  border-radius: 6px;
+}
+
+.holo {
+  animation: holoShine 2s infinite alternate;
+  box-shadow: 0 0 12px 4px rgba(255, 255, 0, 0.5);
+  border: 2px solid gold;
+  border-radius: 12px;
+}
+
+.no-obtenida {
+  opacity: 0.4;
+}
+
+.faltante {
+  color: red;
+  font-weight: bold;
+  margin-top: 0.5rem;
+}
+
+@keyframes holoShine {
+  0% {
+    filter: brightness(1);
+  }
+  100% {
+    filter: brightness(1.4) saturate(1.2);
+  }
+}
