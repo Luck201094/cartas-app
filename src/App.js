@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from "react";
 
 const cartasDisponibles = [
-  { nombre: "Melanie", imagen: "/imagenes/personajes/melanie.png", rareza: "Común" },
-  { nombre: "Joker", imagen: "/imagenes/personajes/joker.png", rareza: "Mítica" },
-  { nombre: "Rika", imagen: "/imagenes/personajes/rika.png", rareza: "Rara" },
-  { nombre: "Luck", imagen: "/imagenes/personajes/luck.png", rareza: "Legendaria" },
-  { nombre: "Scar", imagen: "/imagenes/personajes/scar.png", rareza: "Poco Común" },
-  { nombre: "Metis", imagen: "/imagenes/personajes/metis.png", rareza: "Mítica" },
+  { nombre: "Melanie", imagen: process.env.PUBLIC_URL + "/imagenes/cartas/melanie.png", rareza: "Común" },
+  { nombre: "Joker", imagen: process.env.PUBLIC_URL + "/imagenes/cartas/joker.png", rareza: "Mítica" },
+  { nombre: "Rika", imagen: process.env.PUBLIC_URL + "/imagenes/cartas/rika.png", rareza: "Rara" },
+  { nombre: "Luck", imagen: process.env.PUBLIC_URL + "/imagenes/cartas/luck.png", rareza: "Legendaria" },
+  { nombre: "Scar", imagen: process.env.PUBLIC_URL + "/imagenes/cartas/scar.png", rareza: "Poco Común" },
+  { nombre: "Metis", imagen: process.env.PUBLIC_URL + "/imagenes/cartas/metis.png", rareza: "Mítica" },
 ];
+
+
 
 const probabilidades = {
   "Común": 100,
