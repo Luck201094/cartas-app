@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/cartas-app/static/css/main.53ffecfa.css",
-    "main.js": "/cartas-app/static/js/main.93e0b465.js",
+    "main.js": "/cartas-app/static/js/main.b8eee02c.js",
     "static/js/453.7ac52b64.chunk.js": "/cartas-app/static/js/453.7ac52b64.chunk.js",
     "index.html": "/cartas-app/index.html",
     "main.53ffecfa.css.map": "/cartas-app/static/css/main.53ffecfa.css.map",
-    "main.93e0b465.js.map": "/cartas-app/static/js/main.93e0b465.js.map",
+    "main.b8eee02c.js.map": "/cartas-app/static/js/main.b8eee02c.js.map",
     "453.7ac52b64.chunk.js.map": "/cartas-app/static/js/453.7ac52b64.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.53ffecfa.css",
-    "static/js/main.93e0b465.js"
+    "static/js/main.b8eee02c.js"
   ]
 }
